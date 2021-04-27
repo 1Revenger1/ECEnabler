@@ -9,11 +9,11 @@ public:
     void deinit();
     
 private:
-    void processKernel(KernelPatcher &patcher);
+    void processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t addres, size_t size);
     
     static IOReturn ecSpaceHandler(unsigned int, unsigned long, unsigned int, unsigned long *, void*, void *);
     
-    mach_vm_address_t orgACPIEC_ecSpaceHandler {};
+    mach_vm_address_t orgACPIEC_ecSpaceHandler {0};
     
 };
 

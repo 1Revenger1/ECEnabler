@@ -51,5 +51,7 @@
 		<key>com.apple.kpi.unsupported</key>
 		<string>12.0.0</string>
 	</dict>
+	<key>OSBundleRequired</key>
+	<string>Root</string>
 </dict>
 </plist>
