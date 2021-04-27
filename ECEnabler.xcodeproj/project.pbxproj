@@ -9,6 +9,19 @@
 /* Begin PBXBuildFile section */
 		A42F74C52637AC33003E5AB9 /* ECEnabler.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A42F74C42637AC33003E5AB9 /* ECEnabler.hpp */; };
 		A42F74C72637AC33003E5AB9 /* ECEnabler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A42F74C62637AC33003E5AB9 /* ECEnabler.cpp */; };
+		A42F74CF2637AE7A003E5AB9 /* ECEStart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A42F74CE2637AE7A003E5AB9 /* ECEStart.cpp */; };
+		A42F74DE2637B0F0003E5AB9 /* kern_mach.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A42F74D42637B0F0003E5AB9 /* kern_mach.hpp */; };
+		A42F74DF2637B0F0003E5AB9 /* plugin_start.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A42F74D52637B0F0003E5AB9 /* plugin_start.hpp */; };
+		A42F74E02637B0F0003E5AB9 /* kern_file.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A42F74D62637B0F0003E5AB9 /* kern_file.hpp */; };
+		A42F74E12637B0F0003E5AB9 /* kern_compression.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A42F74D72637B0F0003E5AB9 /* kern_compression.hpp */; };
+		A42F74E22637B0F0003E5AB9 /* kern_util.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A42F74D82637B0F0003E5AB9 /* kern_util.hpp */; };
+		A42F74E32637B0F0003E5AB9 /* kern_iokit.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A42F74D92637B0F0003E5AB9 /* kern_iokit.hpp */; };
+		A42F74E42637B0F0003E5AB9 /* kern_disasm.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A42F74DA2637B0F0003E5AB9 /* kern_disasm.hpp */; };
+		A42F74E52637B0F0003E5AB9 /* kern_config.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A42F74DB2637B0F0003E5AB9 /* kern_config.hpp */; };
+		A42F74E62637B0F0003E5AB9 /* kern_api.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A42F74DC2637B0F0003E5AB9 /* kern_api.hpp */; };
+		A42F74E72637B0F0003E5AB9 /* kern_patcher.hpp in Headers */ = {isa = PBXBuildFile; fileRef = A42F74DD2637B0F0003E5AB9 /* kern_patcher.hpp */; };
+		A42F74E92637B142003E5AB9 /* plugin_start.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A42F74E82637B142003E5AB9 /* plugin_start.cpp */; };
+		A42F74ED2637B2C5003E5AB9 /* libkmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A42F74EC2637B2C5003E5AB9 /* libkmod.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -16,6 +29,19 @@
 		A42F74C42637AC33003E5AB9 /* ECEnabler.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ECEnabler.hpp; sourceTree = "<group>"; };
 		A42F74C62637AC33003E5AB9 /* ECEnabler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ECEnabler.cpp; sourceTree = "<group>"; };
 		A42F74C82637AC33003E5AB9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A42F74CE2637AE7A003E5AB9 /* ECEStart.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ECEStart.cpp; sourceTree = "<group>"; };
+		A42F74D42637B0F0003E5AB9 /* kern_mach.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_mach.hpp; sourceTree = "<group>"; };
+		A42F74D52637B0F0003E5AB9 /* plugin_start.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = plugin_start.hpp; sourceTree = "<group>"; };
+		A42F74D62637B0F0003E5AB9 /* kern_file.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_file.hpp; sourceTree = "<group>"; };
+		A42F74D72637B0F0003E5AB9 /* kern_compression.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_compression.hpp; sourceTree = "<group>"; };
+		A42F74D82637B0F0003E5AB9 /* kern_util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_util.hpp; sourceTree = "<group>"; };
+		A42F74D92637B0F0003E5AB9 /* kern_iokit.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_iokit.hpp; sourceTree = "<group>"; };
+		A42F74DA2637B0F0003E5AB9 /* kern_disasm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_disasm.hpp; sourceTree = "<group>"; };
+		A42F74DB2637B0F0003E5AB9 /* kern_config.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_config.hpp; sourceTree = "<group>"; };
+		A42F74DC2637B0F0003E5AB9 /* kern_api.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_api.hpp; sourceTree = "<group>"; };
+		A42F74DD2637B0F0003E5AB9 /* kern_patcher.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_patcher.hpp; sourceTree = "<group>"; };
+		A42F74E82637B142003E5AB9 /* plugin_start.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = plugin_start.cpp; sourceTree = "<group>"; };
+		A42F74EC2637B2C5003E5AB9 /* libkmod.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libkmod.a; path = usr/lib/libkmod.a; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -23,6 +49,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A42F74ED2637B2C5003E5AB9 /* libkmod.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -32,8 +59,11 @@
 		A42F74B72637AC33003E5AB9 = {
 			isa = PBXGroup;
 			children = (
+				A42F74EA2637B151003E5AB9 /* Library */,
+				A42F74D02637AF96003E5AB9 /* Headers */,
 				A42F74C32637AC33003E5AB9 /* ECEnabler */,
 				A42F74C22637AC33003E5AB9 /* Products */,
+				A42F74EB2637B2C5003E5AB9 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -50,9 +80,45 @@
 			children = (
 				A42F74C42637AC33003E5AB9 /* ECEnabler.hpp */,
 				A42F74C62637AC33003E5AB9 /* ECEnabler.cpp */,
+				A42F74CE2637AE7A003E5AB9 /* ECEStart.cpp */,
 				A42F74C82637AC33003E5AB9 /* Info.plist */,
 			);
 			path = ECEnabler;
+			sourceTree = "<group>";
+		};
+		A42F74D02637AF96003E5AB9 /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				A42F74DC2637B0F0003E5AB9 /* kern_api.hpp */,
+				A42F74D72637B0F0003E5AB9 /* kern_compression.hpp */,
+				A42F74DB2637B0F0003E5AB9 /* kern_config.hpp */,
+				A42F74DA2637B0F0003E5AB9 /* kern_disasm.hpp */,
+				A42F74D62637B0F0003E5AB9 /* kern_file.hpp */,
+				A42F74D92637B0F0003E5AB9 /* kern_iokit.hpp */,
+				A42F74D42637B0F0003E5AB9 /* kern_mach.hpp */,
+				A42F74DD2637B0F0003E5AB9 /* kern_patcher.hpp */,
+				A42F74D82637B0F0003E5AB9 /* kern_util.hpp */,
+				A42F74D52637B0F0003E5AB9 /* plugin_start.hpp */,
+			);
+			name = Headers;
+			path = Lilu.kext/Contents/Resources/Headers;
+			sourceTree = SOURCE_ROOT;
+		};
+		A42F74EA2637B151003E5AB9 /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				A42F74E82637B142003E5AB9 /* plugin_start.cpp */,
+			);
+			name = Library;
+			path = Lilu.kext/Contents/Resources/Library;
+			sourceTree = SOURCE_ROOT;
+		};
+		A42F74EB2637B2C5003E5AB9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A42F74EC2637B2C5003E5AB9 /* libkmod.a */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -62,7 +128,17 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A42F74E12637B0F0003E5AB9 /* kern_compression.hpp in Headers */,
+				A42F74DF2637B0F0003E5AB9 /* plugin_start.hpp in Headers */,
 				A42F74C52637AC33003E5AB9 /* ECEnabler.hpp in Headers */,
+				A42F74E72637B0F0003E5AB9 /* kern_patcher.hpp in Headers */,
+				A42F74E62637B0F0003E5AB9 /* kern_api.hpp in Headers */,
+				A42F74E02637B0F0003E5AB9 /* kern_file.hpp in Headers */,
+				A42F74E22637B0F0003E5AB9 /* kern_util.hpp in Headers */,
+				A42F74E42637B0F0003E5AB9 /* kern_disasm.hpp in Headers */,
+				A42F74DE2637B0F0003E5AB9 /* kern_mach.hpp in Headers */,
+				A42F74E32637B0F0003E5AB9 /* kern_iokit.hpp in Headers */,
+				A42F74E52637B0F0003E5AB9 /* kern_config.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -133,7 +209,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A42F74CF2637AE7A003E5AB9 /* ECEStart.cpp in Sources */,
 				A42F74C72637AC33003E5AB9 /* ECEnabler.cpp in Sources */,
+				A42F74E92637B142003E5AB9 /* plugin_start.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -191,6 +269,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "${PROJECT_DIR}/Lilu.kext/Contents/Resources";
+				KERNEL_EXTENSION_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
+				KERNEL_FRAMEWORK_HEADERS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/MacKernelSDK/Library/x86_64";
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -244,6 +326,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "${PROJECT_DIR}/Lilu.kext/Contents/Resources";
+				KERNEL_EXTENSION_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
+				KERNEL_FRAMEWORK_HEADERS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/MacKernelSDK/Library/x86_64";
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
