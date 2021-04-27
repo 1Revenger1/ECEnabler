@@ -8,9 +8,8 @@ public:
     void init();
     void deinit();
     
-    void processKernel(KernelPatcher &patcher);
 private:
-    static ECE *callbackECE;
+    void processKernel(KernelPatcher &patcher);
     
     static IOReturn ecSpaceHandler(unsigned int, unsigned long, unsigned int, unsigned long *, void*, void *);
     

@@ -8,7 +8,7 @@
 //    {"com.apple.driver.AppleACPIEC", kextACPIEC, arrsize(kextACPIEC), {true}, {}, KernelPatcher::KextInfo::Unloaded },
 //};
 
-ECE *ECE::callbackECE = nullptr;
+static ECE *callbackECE = nullptr;
 
 void ECE::init() {
     callbackECE = this;
@@ -19,11 +19,16 @@ void ECE::init() {
     }, this);
 }
 
+void ECE::deinit()
+{
+    
+}
+
 void ECE::processKernel(KernelPatcher &patcher)
 {
     DBGLOG("ECE", "process kernel called!");
     
-    KernelPatcher::RouteRequest request {"ecSpaceHandler", ecSpaceHandler, orgACPIEC_ecSpaceHandler};
+    KernelPatcher::RouteRequest request {"__ZN11AppleACPIEC14ecSpaceHandlerEjmjPmPvS1_", ecSpaceHandler, orgACPIEC_ecSpaceHandler};
     if (!patcher.routeMultiple(KernelPatcher::KernelID, &request, 1)) {
         SYSLOG("ECE", "patcher.routeMultiple for %s failed with error %d", request.symbol, patcher.getError());
         patcher.clearError();
@@ -32,6 +37,7 @@ void ECE::processKernel(KernelPatcher &patcher)
 
 IOReturn ECE::ecSpaceHandler(unsigned int param_1, unsigned long addr, unsigned int bits, unsigned long *values64, void *handlerContext, void *RegionContext)
 {
+    // Call original function
     IOReturn result = FunctionCast(ecSpaceHandler, callbackECE->orgACPIEC_ecSpaceHandler) (
         param_1,
         addr,
