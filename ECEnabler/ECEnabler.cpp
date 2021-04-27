@@ -2,7 +2,7 @@
 
 #include "ECEnabler.hpp"
 
-static const char *kextACPIEC[] { "/System/Library/Extensions/AppleACPIPlatform.kext/Contents/PlugIns/AppleACPIEC/Contents/MacOS/AppleACPIEC" };
+static const char *kextACPIEC[] { "/System/Library/Extensions/AppleACPIPlatform.kext/Contents/PlugIns/AppleACPIEC.kext/Contents/MacOS/AppleACPIEC" };
 
 static KernelPatcher::KextInfo kextList[] {
     {"com.apple.driver.AppleACPIEC", kextACPIEC, arrsize(kextACPIEC), {true}, {}, KernelPatcher::KextInfo::Unloaded },
@@ -27,31 +27,57 @@ void ECE::deinit()
 void ECE::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t address, size_t size)
 {
     if (index != kextList[0].loadIndex) return;
-    mach_vm_address_t funcAddr = patcher.solveSymbol(index, "__ZN11AppleACPIEC14ecSpaceHandlerEjmjPmPvS1_", address, size, false);
-    SYSLOG("ECE", "process kext called! Index: %d Addr: %p Size: %x FuncAddr: %p", index, address, size, funcAddr);
+    SYSLOG("ECE", "process kext called! Index: %d Addr: %p Size: %x", index, address, size);
     
     KernelPatcher::RouteRequest request ("__ZN11AppleACPIEC14ecSpaceHandlerEjmjPmPvS1_", ecSpaceHandler, orgACPIEC_ecSpaceHandler);
     
-//    if (!patcher.routeMultiple(index, &request, 1, address  , size)) {
-//        SYSLOG("ECE", "patcher.routeMultiple for %s failed with error %d", request.symbol, patcher.getError());
-//        patcher.clearError();
-//    }
+    if (!patcher.routeMultiple(index, &request, 1, address  , size)) {
+        SYSLOG("ECE", "patcher.routeMultiple for %s failed with error %d", request.symbol, patcher.getError());
+        patcher.clearError();
+    }
 }
 
-IOReturn ECE::ecSpaceHandler(unsigned int param_1, unsigned long addr, unsigned int bits, unsigned long *values64, void *handlerContext, void *RegionContext)
+/**
+ * Redirected from AppleACPIEC::ecSpaceHandler (called from AppleACPIPlatform as an address space handler)
+ * Will call the original ecSpaceHandler for writes, as well as multiple times for reading
+ *
+ * TODO: Possibly get IOCommandGate from AppleACPIEC to run our own actions
+ */
+IOReturn ECE::ecSpaceHandler(unsigned int write, unsigned long addr, unsigned int bits, unsigned char *values64, void *handlerContext, void *RegionContext)
 {
-//    // Call original function
-//    IOReturn result = FunctionCast(ecSpaceHandler, callbackECE->orgACPIEC_ecSpaceHandler) (
-//        param_1,
-//        addr,
-//        bits,
-//        values64,
-//        handlerContext,
-//        RegionContext
-//    );
+    IOReturn result = 0;
+    if (addr >= 0x100 || values64 == nullptr || handlerContext == nullptr) {
+        return AE_BAD_PARAMETER;
+    }
     
-    SYSLOG("ECE", "ecSpaceHandler is called: %ud %ul %ud %ul %p %p", param_1, addr, bits, values64, handlerContext, RegionContext);
-//    SYSLOG("ECE", "Return value of %d", result);
+    if (write == 1) {
+        // Do not modify write requests (for now)
+        result = FunctionCast(ecSpaceHandler, callbackECE->orgACPIEC_ecSpaceHandler) (
+            write,
+            addr,
+            bits,
+            values64,
+            handlerContext,
+            RegionContext
+        );
+        DBGLOG("ECE", "write at %x (%x bits long) with val: %x", addr, bits, *values64);
+    } else {
+        // Read up to a long (8 bytes), 1 byte at a time
+        int bytesOffset = min(7, bits / 8);
+        int index = 0;
+        do {
+            result = FunctionCast(ecSpaceHandler, callbackECE->orgACPIEC_ecSpaceHandler) (
+                write,
+                addr + index,
+                8,
+                values64 + index,
+                handlerContext,
+                RegionContext
+            );
+            index++;
+        } while (index < bytesOffset && result == 0);
+        DBGLOG("ECE", "read at %x (%x bits long)", addr, bits);
+    }
     
-    return 0x1001;
+    return result;
 }

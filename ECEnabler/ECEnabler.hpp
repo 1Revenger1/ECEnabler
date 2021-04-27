@@ -3,6 +3,8 @@
 
 #include <Headers/kern_patcher.hpp>
 
+#define AE_BAD_PARAMETER 0x1001
+
 class ECE {
 public:
     void init();
@@ -11,7 +13,7 @@ public:
 private:
     void processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t addres, size_t size);
     
-    static IOReturn ecSpaceHandler(unsigned int, unsigned long, unsigned int, unsigned long *, void*, void *);
+    static IOReturn ecSpaceHandler(unsigned int, unsigned long, unsigned int, unsigned char *, void*, void *);
     
     mach_vm_address_t orgACPIEC_ecSpaceHandler {0};
     
