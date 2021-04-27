@@ -8,6 +8,6 @@ Only supports Catalina through Big Sur
 
 ## Configuration
 
-`-eceoff` - Disable ECEnabler
-`-ecedbg` - Enable ECEnabler debug logs
-`-ecebeta` - Remove upper OS limit for beta OS
+`-eceoff` - Disable ECEnabler  
+`-ecedbg` - Enable ECEnabler debug logs  
+`-ecebeta` - Remove upper OS limit for beta OS  
