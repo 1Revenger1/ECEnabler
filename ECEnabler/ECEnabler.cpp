@@ -62,8 +62,17 @@ IOReturn ECE::ecSpaceHandler(unsigned int write, unsigned long addr, unsigned in
         );
         DBGLOG("ECE", "write at %x (%x bits long) with val: %x", addr, bits, *values64);
     } else {
+        int bytes = bits / 8;
+        
+        // Do not error out, as this breaks battery methods and prevents status from being read.
+        // Set a sane value though
+        if (bytes > 8) {
+            *values64 = 0;
+            return kIOReturnSuccess;
+        }
+        
         // Read up to a long (8 bytes), 1 byte at a time
-        int bytesOffset = min(7, bits / 8);
+        int maxOffset = min(8, bytes);
         int index = 0;
         do {
             result = FunctionCast(ecSpaceHandler, callbackECE->orgACPIEC_ecSpaceHandler) (
@@ -75,7 +84,7 @@ IOReturn ECE::ecSpaceHandler(unsigned int write, unsigned long addr, unsigned in
                 RegionContext
             );
             index++;
-        } while (index < bytesOffset && result == 0);
+        } while (index < maxOffset && result == 0);
         DBGLOG("ECE", "read at %x (%x bits long)", addr, bits);
     }
     
