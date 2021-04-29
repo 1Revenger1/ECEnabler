@@ -3,10 +3,14 @@
 #include "ECEnabler.hpp"
 
 static const char *kextACPIEC[] { "/System/Library/Extensions/AppleACPIPlatform.kext/Contents/PlugIns/AppleACPIEC.kext/Contents/MacOS/AppleACPIEC" };
-
 static KernelPatcher::KextInfo kextList[] {
     {"com.apple.driver.AppleACPIEC", kextACPIEC, arrsize(kextACPIEC), {true}, {}, KernelPatcher::KextInfo::Unloaded },
 };
+
+static UInt8 movPatchFind[] = {0x49, 0x89, 0x06,    // MOV (%R14), RAX
+                               0xeb, 0x34};         // JMP 0x36
+static UInt8 movPatchReplace[] = {0x41, 0x88, 0x06, // MOV (%R14), %AL
+                                  0xeb, 0x34};      // JMP 0x36
 
 static ECE *callbackECE = nullptr;
 
@@ -26,14 +30,32 @@ void ECE::deinit()
 
 void ECE::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t address, size_t size)
 {
-    if (index != kextList[0].loadIndex) return;
-    SYSLOG("ECE", "process kext called! Index: %d Addr: %p Size: %x", index, address, size);
-    
-    KernelPatcher::RouteRequest request ("__ZN11AppleACPIEC14ecSpaceHandlerEjmjPmPvS1_", ecSpaceHandler, orgACPIEC_ecSpaceHandler);
-    
-    if (!patcher.routeMultiple(index, &request, 1, address  , size)) {
-        SYSLOG("ECE", "patcher.routeMultiple for %s failed with error %d", request.symbol, patcher.getError());
-        patcher.clearError();
+    if (index == kextList[0].loadIndex) {
+        KernelPatcher::RouteRequest request ("__ZN11AppleACPIEC14ecSpaceHandlerEjmjPmPvS1_", ecSpaceHandler, orgACPIEC_ecSpaceHandler);
+        
+        const KernelPatcher::LookupPatch movPatch = {
+            &kextList[0],
+            movPatchFind, // MOV (%R14),RAX
+            movPatchReplace, // MOV (%R14),AL
+            sizeof(movPatchFind),
+            1
+        };
+        
+        patcher.applyLookupPatch(&movPatch);
+        
+        if (patcher.getError() != KernelPatcher::Error::NoError) {
+            SYSLOG("ECE", "Failed to apply ecSpaceHandler MOV patch");
+            patcher.clearError();
+            // If patch cannot be applied, do not allow function to be routed
+            // This can lead to memory and stack corruption!
+            kextList[0].switchOff();
+            return;
+        }
+        
+        if (!patcher.routeMultiple(index, &request, 1, address  , size)) {
+            SYSLOG("ECE", "patcher.routeMultiple for %s failed with error %d", request.symbol, patcher.getError());
+            patcher.clearError();
+        }
     }
 }
 
@@ -43,10 +65,11 @@ void ECE::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t ad
  *
  * TODO: Possibly get IOCommandGate from AppleACPIEC to run our own actions
  */
-IOReturn ECE::ecSpaceHandler(unsigned int write, unsigned long addr, unsigned int bits, unsigned char *values64, void *handlerContext, void *RegionContext)
+IOReturn ECE::ecSpaceHandler(UInt32 write, UInt64 addr, UInt32 bits, UInt8 *values64, void *handlerContext, void *RegionContext)
 {
+    int maxAddr = 0x100 - (bits / 8);
     IOReturn result = 0;
-    if (addr >= 0x100 || values64 == nullptr || handlerContext == nullptr) {
+    if (addr > maxAddr || values64 == nullptr || handlerContext == nullptr) {
         return AE_BAD_PARAMETER;
     }
     
@@ -60,19 +83,9 @@ IOReturn ECE::ecSpaceHandler(unsigned int write, unsigned long addr, unsigned in
             handlerContext,
             RegionContext
         );
-        DBGLOG("ECE", "write at %x (%x bits long) with val: %x", addr, bits, *values64);
     } else {
-        int bytes = bits / 8;
-        
-        // Do not error out, as this breaks battery methods and prevents status from being read.
-        // Set a sane value though
-        if (bytes > 8) {
-            *values64 = 0;
-            return kIOReturnSuccess;
-        }
-        
-        // Read up to a long (8 bytes), 1 byte at a time
-        int maxOffset = min(8, bytes);
+        // Split read into 1 byte chunks
+        int maxOffset = bits / 8;
         int index = 0;
         do {
             result = FunctionCast(ecSpaceHandler, callbackECE->orgACPIEC_ecSpaceHandler) (
@@ -85,7 +98,6 @@ IOReturn ECE::ecSpaceHandler(unsigned int write, unsigned long addr, unsigned in
             );
             index++;
         } while (index < maxOffset && result == 0);
-        DBGLOG("ECE", "read at %x (%x bits long)", addr, bits);
     }
     
     return result;

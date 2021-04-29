@@ -13,10 +13,9 @@ public:
 private:
     void processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t addres, size_t size);
     
-    static IOReturn ecSpaceHandler(unsigned int, unsigned long, unsigned int, unsigned char *, void*, void *);
+    static IOReturn ecSpaceHandler(UInt32, UInt64, UInt32, UInt8 *, void*, void *);
     
     mach_vm_address_t orgACPIEC_ecSpaceHandler {0};
-    
 };
 
 #endif //kern_ece_hpp
