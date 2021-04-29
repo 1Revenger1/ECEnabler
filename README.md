@@ -1,10 +1,8 @@
 # ECEnabler
 
-## This is an experimental Lilu Plugin, not meant for day to day use. I am not responsible for any sort of damage caused by this kext.
+Allows reading Embedded Controller fields over 1 byte long, vastly reducing the amount of ACPI modification needed (if any) for working battery status.
 
-Allows reading values at and below the size of 8 bytes, possibly allowing a reduction in the amount of battery patching needed. Anything over 8 bytes will still be read, NOT erroring out, though the value will be truncated to 8 bytes.
-
-Only supports Catalina through Big Sur
+Only supports High Sierra through Big Sur
 
 ## Configuration
 
