@@ -7,10 +7,15 @@ static KernelPatcher::KextInfo kextList[] {
     {"com.apple.driver.AppleACPIEC", kextACPIEC, arrsize(kextACPIEC), {true}, {}, KernelPatcher::KextInfo::Unloaded },
 };
 
-static UInt8 movPatchFind[] = {0x49, 0x89, 0x06,    // MOV (%R14), RAX
-                               0xeb, 0x34};         // JMP 0x36
-static UInt8 movPatchReplace[] = {0x41, 0x88, 0x06, // MOV (%R14), %AL
-                                  0xeb, 0x34};      // JMP 0x36
+static UInt8 movPatchFind[] = {
+    0x41, 0x0F, 0xB6, 0x07, // MOVZX %EAX, (%R15)
+    0x49, 0x89, 0x06        // MOV (%R14), %RAX
+};
+                               
+static UInt8 movPatchReplace[] = {
+    0x41, 0x0F, 0xB6, 0x07, // MOVZX %EAX, (%R15)
+    0x41, 0x88, 0x06, // MOV (%R14), %AL
+};
 
 static ECE *callbackECE = nullptr;
 
