@@ -2,21 +2,6 @@
 
 #include "ECEnabler.hpp"
 
-static const char *kextACPIEC[] { "/System/Library/Extensions/AppleACPIPlatform.kext/Contents/PlugIns/AppleACPIEC.kext/Contents/MacOS/AppleACPIEC" };
-static KernelPatcher::KextInfo kextList[] {
-    {"com.apple.driver.AppleACPIEC", kextACPIEC, arrsize(kextACPIEC), {true}, {}, KernelPatcher::KextInfo::Unloaded },
-};
-
-static UInt8 movPatchFind[] = {
-    0x41, 0x0F, 0xB6, 0x07, // MOVZX %EAX, (%R15)
-    0x49, 0x89, 0x06        // MOV (%R14), %RAX
-};
-                               
-static UInt8 movPatchReplace[] = {
-    0x41, 0x0F, 0xB6, 0x07, // MOVZX %EAX, (%R15)
-    0x41, 0x88, 0x06, // MOV (%R14), %AL
-};
-
 static ECE *callbackECE = nullptr;
 
 void ECE::init() {
@@ -36,17 +21,41 @@ void ECE::deinit()
 void ECE::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t address, size_t size)
 {
     if (index == kextList[0].loadIndex) {
-        KernelPatcher::RouteRequest request ("__ZN11AppleACPIEC14ecSpaceHandlerEjmjPmPvS1_", ecSpaceHandler, orgACPIEC_ecSpaceHandler);
+        // Find ecSpaceHandler so that we can narrow down where the mov patch happens
+        mach_vm_address_t ecSpaceAddr = patcher.solveSymbol(kextList[0].loadIndex, ecSpaceHandlerSymbol, address, size);
         
-        const KernelPatcher::LookupPatch movPatch = {
+        if (patcher.getError() != KernelPatcher::Error::NoError) {
+            SYSLOG("ECE", "Failed to find ecSpaceHandler");
+            patcher.clearError();
+            return;
+        }
+        
+        KernelPatcher::LookupPatch movPatch = {
             &kextList[0],
-            movPatchFind, // MOV (%R14),RAX
-            movPatchReplace, // MOV (%R14),AL
-            sizeof(movPatchFind),
+            nullptr,
+            nullptr,
+            0,
             1
         };
         
-        patcher.applyLookupPatch(&movPatch);
+        if (getKernelVersion() == KernelVersion::Lion ||
+            getKernelVersion() == KernelVersion::MountainLion) {
+            movPatch.find = lionMovPatchFind;
+            movPatch.replace = lionMovPatchReplace;
+            movPatch.size = sizeof(lionMovPatchFind);
+        } else if (getKernelVersion() == KernelVersion::Mavericks) {
+            movPatch.find = mavericksMovPatchFind;
+            movPatch.replace = mavericksMovPatchReplace;
+            movPatch.size = sizeof(mavericksMovPatchFind);
+        } else {
+            movPatch.find = movPatchFind;
+            movPatch.replace = movPatchReplace;
+            movPatch.size = sizeof(movPatchFind);
+        }
+        
+        // Do patch within ecSpaceHandler
+        size_t maxPatchSize = size - (ecSpaceAddr - address);
+        patcher.applyLookupPatch(&movPatch, (UInt8 *) ecSpaceAddr, maxPatchSize);
         
         if (patcher.getError() != KernelPatcher::Error::NoError) {
             SYSLOG("ECE", "Failed to apply ecSpaceHandler MOV patch");
@@ -57,6 +66,7 @@ void ECE::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t ad
             return;
         }
         
+        KernelPatcher::RouteRequest request (ecSpaceHandlerSymbol, ecSpaceHandler, orgACPIEC_ecSpaceHandler);
         if (!patcher.routeMultiple(index, &request, 1, address  , size)) {
             SYSLOG("ECE", "patcher.routeMultiple for %s failed with error %d", request.symbol, patcher.getError());
             patcher.clearError();
