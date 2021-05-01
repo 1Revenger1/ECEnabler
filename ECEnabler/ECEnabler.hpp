@@ -10,15 +10,24 @@ static KernelPatcher::KextInfo kextList[] {
     {"com.apple.driver.AppleACPIEC", kextACPIEC, arrsize(kextACPIEC), {true}, {}, KernelPatcher::KextInfo::Unloaded },
 };
 
-static const char *ecSpaceHandlerSymbol { "__ZN11AppleACPIEC14ecSpaceHandlerEjmjPmPvS1_" };
+static const char *oldEcSpaceHandlerSymbol { "__ZN11AppleACPIEC14ecSpaceHandlerEjyjPyPvS1_" }; // 10.7-10.12
+static const char *newEcSpaceHandlerSymbol { "__ZN11AppleACPIEC14ecSpaceHandlerEjmjPmPvS1_" }; // 10.13-???
+
+/*
+ * Patch UInt64 MOV to UInt8 MOV when copying EC result into result buffer.
+ *
+ * values64* is either an IntObj (UInt64 for 64bit machines), or BufferObj
+ *   if the EC field size is over the size of an IntObj. Writing to these
+ *   without the below patches causes buffer overruns and kernel panics.
+ */
 
 // 10.7 - 10.8
 static UInt8 lionMovPatchFind[] = {
-    0x48, 0x89, 0x0b,   // MOV (%RBX), %RCX
+    0x48, 0x89, 0x0B,   // MOV (%RBX), %RCX
 };
 
 static UInt8 lionMovPatchReplace[] = {
-    0x40, 0x89, 0x0E,   // MOV (%RBX), %CL
+    0x40, 0x88, 0x0B,   // MOV (%RBX), %CL
 };
 
 // 10.9

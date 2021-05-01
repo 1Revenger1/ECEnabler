@@ -21,6 +21,11 @@ void ECE::deinit()
 void ECE::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t address, size_t size)
 {
     if (index == kextList[0].loadIndex) {
+        const char *ecSpaceHandlerSymbol = newEcSpaceHandlerSymbol;
+        if (getKernelVersion() <= KernelVersion::Sierra) {
+            ecSpaceHandlerSymbol = oldEcSpaceHandlerSymbol;
+        }
+        
         // Find ecSpaceHandler so that we can narrow down where the mov patch happens
         mach_vm_address_t ecSpaceAddr = patcher.solveSymbol(kextList[0].loadIndex, ecSpaceHandlerSymbol, address, size);
         
@@ -85,9 +90,11 @@ IOReturn ECE::ecSpaceHandler(UInt32 write, UInt64 addr, UInt32 bits, UInt8 *valu
     int maxAddr = 0x100 - (bits / 8);
     IOReturn result = 0;
     if (addr > maxAddr || values64 == nullptr || handlerContext == nullptr) {
+        DBGLOG("ECE", "Addr: 0x%x > MaxAddr: 0x%x", addr, maxAddr);
         return AE_BAD_PARAMETER;
     }
     
+    DBGLOG("ECE", "%s @ 0x%x of size: 0x%x", write ? "write" : "read", addr, bits);
     if (write == 1) {
         // Do not modify write requests (for now)
         result = FunctionCast(ecSpaceHandler, callbackECE->orgACPIEC_ecSpaceHandler) (
