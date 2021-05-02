@@ -2,7 +2,7 @@
 
 Allows reading Embedded Controller fields over 1 byte long, vastly reducing the amount of ACPI modification needed (if any) for working battery status.
 
-Supports Mountain Lion to Big Sur (10.8-11)
+Supports Lion to Big Sur (10.7-11)
 
 ## Configuration
 
