@@ -26,51 +26,6 @@ void ECE::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t ad
             ecSpaceHandlerSymbol = oldEcSpaceHandlerSymbol;
         }
         
-        // Find ecSpaceHandler so that we can narrow down where the mov patch happens
-        mach_vm_address_t ecSpaceAddr = patcher.solveSymbol(kextList[0].loadIndex, ecSpaceHandlerSymbol, address, size);
-        
-        if (patcher.getError() != KernelPatcher::Error::NoError) {
-            SYSLOG("ECE", "Failed to find ecSpaceHandler");
-            patcher.clearError();
-            return;
-        }
-        
-        KernelPatcher::LookupPatch movPatch = {
-            &kextList[0],
-            nullptr,
-            nullptr,
-            0,
-            1
-        };
-        
-        if (getKernelVersion() == KernelVersion::Lion ||
-            getKernelVersion() == KernelVersion::MountainLion) {
-            movPatch.find = lionMovPatchFind;
-            movPatch.replace = lionMovPatchReplace;
-            movPatch.size = sizeof(lionMovPatchFind);
-        } else if (getKernelVersion() == KernelVersion::Mavericks) {
-            movPatch.find = mavericksMovPatchFind;
-            movPatch.replace = mavericksMovPatchReplace;
-            movPatch.size = sizeof(mavericksMovPatchFind);
-        } else {
-            movPatch.find = movPatchFind;
-            movPatch.replace = movPatchReplace;
-            movPatch.size = sizeof(movPatchFind);
-        }
-        
-        // Do patch within ecSpaceHandler
-        size_t maxPatchSize = size - (ecSpaceAddr - address);
-        patcher.applyLookupPatch(&movPatch, (UInt8 *) ecSpaceAddr, maxPatchSize);
-        
-        if (patcher.getError() != KernelPatcher::Error::NoError) {
-            SYSLOG("ECE", "Failed to apply ecSpaceHandler MOV patch");
-            patcher.clearError();
-            // If patch cannot be applied, do not allow function to be routed
-            // This can lead to memory and stack corruption!
-            kextList[0].switchOff();
-            return;
-        }
-        
         KernelPatcher::RouteRequest request (ecSpaceHandlerSymbol, ecSpaceHandler, orgACPIEC_ecSpaceHandler);
         if (!patcher.routeMultiple(index, &request, 1, address  , size)) {
             SYSLOG("ECE", "patcher.routeMultiple for %s failed with error %d", request.symbol, patcher.getError());
@@ -83,43 +38,52 @@ void ECE::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t ad
  * Redirected from AppleACPIEC::ecSpaceHandler (called from AppleACPIPlatform as an address space handler)
  * Will call the original ecSpaceHandler for writes, as well as multiple times for reading
  *
+ * @param write         Read = 0 or Write = 1
+ * @param addr           Address within EC field
+ * @param bits           Size of field, always guaranteed to always be a multiple of 8
+ * @param values64  Buffer to read from or write too
+ *
  * TODO: Possibly get IOCommandGate from AppleACPIEC to run our own actions
  */
 IOReturn ECE::ecSpaceHandler(UInt32 write, UInt64 addr, UInt32 bits, UInt8 *values64, void *handlerContext, void *RegionContext)
 {
-    int maxAddr = 0x100 - (bits / 8);
+    int bytes = (bits / 8);
+    int maxAddr = 0x100 - bytes;
     IOReturn result = 0;
+    // ecSpaceHandler always writes a 64 bit val even if only reading/writing 8 bits from the EC
+    UInt64 buffer;
+    
     if (addr > maxAddr || values64 == nullptr || handlerContext == nullptr) {
         DBGLOG("ECE", "Addr: 0x%x > MaxAddr: 0x%x", addr, maxAddr);
         return AE_BAD_PARAMETER;
     }
     
     DBGLOG("ECE", "%s @ 0x%x of size: 0x%x", write ? "write" : "read", addr, bits);
+    // Split read/writes into 8 bit chunks
     if (write == 1) {
-        // Do not modify write requests (for now)
-        result = FunctionCast(ecSpaceHandler, callbackECE->orgACPIEC_ecSpaceHandler) (
-            write,
-            addr,
-            bits,
-            values64,
-            handlerContext,
-            RegionContext
-        );
-    } else {
-        // Split read into 1 byte chunks
-        int maxOffset = bits / 8;
-        int index = 0;
-        do {
+        for (int i = 0; i < bytes && result == 0; i++) {
+            buffer = *(values64 + i);
             result = FunctionCast(ecSpaceHandler, callbackECE->orgACPIEC_ecSpaceHandler) (
                 write,
-                addr + index,
+                addr + i,
                 8,
-                values64 + index,
+                (UInt8 *) &buffer,
                 handlerContext,
                 RegionContext
             );
-            index++;
-        } while (index < maxOffset && result == 0);
+        }
+    } else {
+        for (int i = 0; i < bytes && result == 0; i++) {
+            result = FunctionCast(ecSpaceHandler, callbackECE->orgACPIEC_ecSpaceHandler) (
+                write,
+                addr + i,
+                8,
+                (UInt8 *) &buffer,
+                handlerContext,
+                RegionContext
+            );
+            *(values64 + i) = (UInt8) buffer;
+        };
     }
     
     return result;
