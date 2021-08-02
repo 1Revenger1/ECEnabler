@@ -51,7 +51,7 @@ IOReturn ECE::ecSpaceHandler(UInt32 write, UInt64 addr, UInt32 bits, UInt8 *valu
     int maxAddr = 0x100 - bytes;
     IOReturn result = 0;
     // ecSpaceHandler always writes a 64 bit val even if only reading/writing 8 bits from the EC
-    UInt64 buffer;
+    UInt64 buffer = 0;
     
     if (addr > maxAddr || values64 == nullptr || handlerContext == nullptr) {
         DBGLOG("ECE", "Addr: 0x%x > MaxAddr: 0x%x", addr, maxAddr);
@@ -62,7 +62,8 @@ IOReturn ECE::ecSpaceHandler(UInt32 write, UInt64 addr, UInt32 bits, UInt8 *valu
     // Split read/writes into 8 bit chunks
     if (write == 1) {
         for (int i = 0; i < bytes && result == 0; i++) {
-            buffer = *(values64 + i);
+            DBGLOG("ECE", "0x%lx 0x%x", *(values64 + i), *(values64 + i) & 0xFF);
+            buffer = *(values64 + i) & 0xFF;
             result = FunctionCast(ecSpaceHandler, callbackECE->orgACPIEC_ecSpaceHandler) (
                 write,
                 addr + i,
