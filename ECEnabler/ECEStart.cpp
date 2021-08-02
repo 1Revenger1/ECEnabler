@@ -27,7 +27,9 @@ const char *bootargBeta[] {
 PluginConfiguration ADDPR(config) {
     xStringify(PRODUCT_NAME),
     parseModuleVersion(xStringify(MODULE_VERSION)),
-    LiluAPI::AllowNormal,
+    LiluAPI::AllowNormal |
+    LiluAPI::AllowSafeMode |
+    LiluAPI::AllowInstallerRecovery,
     bootargOff,
     arrsize(bootargOff),
     bootargDebug,
