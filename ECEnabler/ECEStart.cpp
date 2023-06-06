@@ -37,7 +37,7 @@ PluginConfiguration ADDPR(config) {
     bootargBeta,
     arrsize(bootargBeta),
     KernelVersion::Lion,
-    KernelVersion::Ventura,
+    KernelVersion::Sonoma,
     []() {
         ece.init();
     }
