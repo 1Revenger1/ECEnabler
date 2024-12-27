@@ -2,7 +2,7 @@
 
 Allows reading Embedded Controller fields over 1 byte long, vastly reducing the amount of ACPI modification needed (if any) for working battery status.
 
-Supports Lion to Sonoma (10.7-14)
+Supports Lion to Sequoia (10.7-15)
 
 ## Configuration
 
